@@ -1,0 +1,351 @@
+PARSER_BEGIN(Lugosi)
+import java.io.*;
+// importar as classes da árvore sintática:
+import ast.*;
+
+public class Lugosi {
+  public static void main(String args[]) throws Exception{
+  // abrir o arquivo passado por linha
+  // de comando contento o código em Lugosi:
+
+  FileInputStream fs = new FileInputStream(new File(args[0]));
+  // Instanciar o parser da linguagem Lugosi passando
+  // como argumento o arquivo contendo o código
+  //Lugosi a ser processado:
+
+  Lugosi parser = new Lugosi(fs);
+  // Chamar a primeira regra do parser que irá
+  // analisar o código e devolver a árvore sintática
+
+  Prog arvore =parser.Lugosi();
+  // passar a árvore para o gerador de código
+  // que deve gerar um arquivo com com o código
+  // alvo na linguagem escolhida:
+  geraCodigo(arvore, args[0])
+  }
+  public static void geraCodigo(ArvoreLugosi prog, String arquivo){
+    //a
+  }
+}
+
+PARSER_END(Lugosi)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <VOID: "void">
+| <IF: "if">
+| <WHILE: "while">
+| <DO: "do">
+| <RETURN: "return">
+| <PRINTIO: "printIO">
+| <LET: "let">
+| <DEF: "def">
+| <FLOAT: "float">
+| <BOOL: "bool">
+| <READIO: "readIO">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <VIRGULA: ",">
+| <TRUE: "true">
+| <FALSE: "false">
+| <PONTOEVIRGULA: ";">
+| <ATR: ":=">
+| <SOMA: "+">
+| <SUB: "-">
+| <MULT: "*">
+| <DIV: "/">
+| <AND: "&&">
+| <OR: "||">
+| <MENOR: "<">
+| <MAIOR: ">">
+| <IGUAL: "==">
+}
+
+TOKEN :
+{
+  <NUM : (["0"-"9"])+(["."]["0"-"9"])+>
+| <ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"])*>
+}
+
+/// LUGOSI -> MAIN FUNC?
+
+void Lugosi () :
+{Main main = null; ArrayList<Fun> fun = new ArrayList<>();}
+{
+  main = main() (fun = Func())* <EOF> 
+  {return new Prog(main, fun);}
+  
+}
+
+/// MAIN -> "void" "main" "{" VARDECL SEQCOMANDOS "}"
+
+void main () :
+{ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> coms = new ArrayList<>();}
+{
+  <VOID> <MAIN> <ACHAVES> vars=VarDecl() coms=SeqComandos() <FCHAVES>
+  { return new Main(vars, coms); }
+
+}
+
+/// VARDECL -> VARDECL "let" TIPO TOKEN_id ";" | vazio
+//estranho 
+VarDecl VarDecl () :
+///{Exp e=null; Token id=null;Exp result=null;}
+{Token type = null; Token var = null;}
+{
+  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA>)*  {return new VarDecl(type.image,var.image)}
+}
+
+///TIPO -> "float" | "bool" | "void"
+void Tipo () :
+{}
+{
+  <FLOAT> | <BOOL> | <VOID>
+}
+
+/// SEQCOMANDOS -> SEQCOMANDOS COMANDO | vazio
+void SeqComandos () :
+{}
+{
+  (Comando())*
+}
+
+/// COMANDO -> TOKEN_id ":=" EXP ";"
+// | TOKEN_id "(" LISTAEXP? ")" ";"
+// | "if" EXP "{" SEQCOMANDOS "}" ";"
+// | "while" EXP "do" "{" SEQCOMANDOS "}" ";"
+// | TOKEN_id ":=" "readIO" "(" ")"
+// | "return" EXP ";"
+// | "printIO" EXP ";"
+
+// void Comando () :
+// {int linha=null; Sttring var=null; }
+// {
+//   <ID> ComandoL() 
+//   | 
+//   <IF> Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+//   | 
+//   <WHILE> Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+//   | 
+//   <RETURN> Exp() <PONTOEVIRGULA>
+//   | 
+//   <PRINTIO> Exp() <PONTOEVIRGULA>
+// }
+
+// void ComandoL () :
+// {}
+// {
+//   <ATR> ComandoLL()
+//   |
+//   <APARENTESES> ListaExp() <FPARENTESES> <PONTOEVIRGULA>
+// }
+
+// void ComandoLL () :
+// {}
+// {
+//   Exp() <PONTOEVIRGULA> 
+//   |
+//   <READIO> <APARENTESES> <FPARENTESES>
+// }
+
+/// EXP -> "(" EXP OP EXP ")" | FATOR
+// void Exp () :
+// {}
+// {
+//   (<APARENTESES> Exp() OP() Exp() <FPARENTESES>) | Fator()
+// } 
+
+// FATOR -> TOKEN_id | TOKEN_id "(" LISTAEXP? ")"
+// | TOKEN_numliteral | "true" | "false"
+
+Exp Fator () :
+{Token t = null;Comando result=null;}
+{
+  t=<ID> FatorL() {result = new EVar(t.image);}
+  | t=<NUM> {result = new EFloat(t.image)} | {result = new ETrue()} | {result = new EFalse()}
+  {return result;} 
+}
+
+Exp FatorL () :
+{Exp e=null;Comando result=null;}
+{
+  (<APARENTESES> e=ListaExp() <FPARENTESES> {result = new Exp(e);})?
+  {return result;} 
+}
+
+/// OP -> "+" | "-" | "*" | "/" | "&&" | "||" | "<" | ">" | "=="
+
+void OP () :
+{}
+{
+  <SOMA> | <SUB> | <MULT> | <DIV> | <AND> | <OR> | <MENOR> | <MAIOR> | <IGUAL>
+}
+
+/// LISTAEXP -> EXP | LISTAEXP "," EXP
+
+void ListaExp () :
+{}
+{
+  Exp() ListaExpL()
+}
+
+void ListaExpL () :
+{}
+{
+  (<VIRGULA> Exp() ListaExpL())?
+}
+
+ParamFormalFun ParamFormalFun () :
+{Token type = null; Token var = null;}
+{
+  type = Tipo() 
+  var = <ID> 
+  {return new ParamFormalFun(type.image, var.image);}
+}
+
+
+// FUNC -> FUNC "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
+// | "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
+
+void Func () :
+{String nome; String retorno; ArrayList<ParamFormalFun> params = new ArrayList<>(); ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> body = new ArrayList<>(); }
+{
+  (<DEF> Tipo() <ID> <APARENTESES> ListaArg() <FPARENTESES> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> 
+   {return new Fun(nome, params, retorno, vars, body);}
+  )*
+}
+
+// LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
+
+void ListaArg () :
+{}
+{
+  Tipo() <ID> (<VIRGULA> Tipo() <ID>)*
+}
+
+
+/// EXP -> "(" EXP OP EXP ")" | FATOR
+Exp Exp () :
+{ Token op = null; Exp arg1 = null, arg2 = null; }
+{
+  (arg1 = Fator()
+  | op = OP() arg2 = Fator() { return new EOpExp(op.image, arg1, arg2); }
+  )*
+} 
+
+/// Não sei se isso tá certo!!!! 
+
+Exp Exp () :
+{ Exp result = null;}
+{
+  result = Fator()
+  (
+    | <APARENTESES> args = ListaExp() <FPARENTESES> { result = new EChamadaFun(result.getName(), args); }
+  )
+  
+  {return result;}
+} 
+
+/// COMANDO -> TOKEN_id ":=" EXP ";"
+// | TOKEN_id "(" LISTAEXP? ")" ";"
+// | "if" EXP "{" SEQCOMANDOS "}" ";"
+// | "while" EXP "do" "{" SEQCOMANDOS "}" ";"
+// | TOKEN_id ":=" "readIO" "(" ")"
+// | "return" EXP ";"
+// | "printIO" EXP ";"
+
+
+///rever isso 
+
+Comando Comando () :
+{}
+{
+  <ID> ComandoL() 
+  | 
+  <IF> Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  | 
+  <WHILE> Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  | 
+  <RETURN> Exp() <PONTOEVIRGULA> {return new CReturn(getToken(1).beginLine, exp); }
+  | 
+  <PRINTIO> Exp() <PONTOEVIRGULA> { return new CPrint(getToken(1).beginLine, exp); }
+}
+
+void ComandoL () :
+{int linha=null; String var=null;}
+{
+  <ATR> ComandoLL() { return new CPrint(getToken(1).beginLine, exp); }
+  |
+  <APARENTESES> ListaExp() <FPARENTESES> <PONTOEVIRGULA>
+}
+
+void ComandoLL () :
+{Exp e-null}
+{
+  Exp() <PONTOEVIRGULA>  
+  |
+  <READIO> <APARENTESES> <FPARENTESES> { return new CReadInput(getToken(1).beginLine, ""); }
+}
+
+
+/// isso aqui parece muito esquisito KKKKKKKK 
+
+CWhile CWhile () :
+{Token linha = null; Exp exp = null; ArrayList<Comando> bloco = new ArrayList<>(); }
+{
+  linha = <NUM> exp = Exp() <ACHAVES> bloco = SeqComandos() <FCHAVES>
+  {return new CWhile(Integer.parseInt(linha.image), exp, bloco)}
+}
+
+CAtribuicao CAtribuicao () :
+{ Token linha = null; Token var = null; Exp exp = null; }
+{
+  linha = <NUM> var = <ID> <ATR> exp = Exp() <PONTOEVIRGULA>
+  { return new CAtribuicao(Integer.parseInt(linha.image), var.image, exp); }
+}
+
+CChamadaFun CChamadaFun () :
+{ Token linha = null; Token fun = null; ArrayList<Exp> args = new ArrayList<>(); }
+{
+  linha = <NUM> fun = <ID> <APARENTESES> args = ListaExp()? <FPARENTESES> <PONTOEVIRGULA>
+  { return new CChamadaFun(Integer.parseInt(linha.image), fun.image, args); }
+}
+
+CIf CIf() :
+{ Token linha = null; Exp exp = null; ArrayList<Comando> bloco = new ArrayList<>(); }
+{
+  linha = <NUM> <IF> exp = Exp() <ACHAVES> bloco = SeqComandos() <FCHAVES>
+  { return new CIf(Integer.parseInt(linha.image), exp, bloco); }
+}
+
+CPrint CPrint() :
+{ Token linha = null; Exp exp = null; }
+{
+  linha = <NUM> <PRINTIO> exp = Exp() <PONTOEVIRGULA>
+  { return new CPrint(Integer.parseInt(linha.image), exp); }
+}
+
+CReadInput CReadInput() :
+{ Token linha = null; Token var = null; }
+{
+  linha = <NUM> <ID> var = <ID> <ATR> <READIO> <APARENTESES> <FPARENTESES> <PONTOEVIRGULA>
+  { return new CReadInput(Integer.parseInt(linha.image), var.image); }
+}
+
+CReturn CReturn() :
+{ Token linha = null; Exp exp = null; }
+{
+  linha = <NUM> <RETURN> exp = Exp() <PONTOEVIRGULA>
+  { return new CReturn(Integer.parseInt(linha.image), exp); }
+}
