@@ -1,0 +1,195 @@
+PARSER_BEGIN(Lugosi)
+import java.io.*;
+public class Lugosi {
+  public static void main(String args[]) throws ParseException,IOException {
+    Lugosi analisador = new Lugosi(new FileInputStream(args[0]));
+    analisador.Lugosi();
+  }
+}
+
+PARSER_END(Lugosi)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <VOID: "void">
+| <IF: "if">
+| <WHILE: "while">
+| <DO: "do">
+| <RETURN: "return">
+| <PRINTIO: "printIO">
+| <LET: "let">
+| <DEF: "def">
+| <FLOAT: "float">
+| <BOOL: "bool">
+| <READIO: "readIO">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <VIRGULA: ",">
+| <TRUE: "true">
+| <FALSE: "false">
+| <PONTOEVIRGULA: ";">
+| <ATR: ":=">
+| <SOMA: "+">
+| <SUB: "-">
+| <MULT: "*">
+| <DIV: "/">
+| <AND: "&&">
+| <OR: "||">
+| <MENOR: "<">
+| <MAIOR: ">">
+| <IGUAL: "==">
+}
+
+TOKEN :
+{
+  <NUM : (["0"-"9"])+(["."]["0"-"9"])+>
+| <ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"])*>
+}
+
+/// LUGOSI -> MAIN FUNC?
+
+void Lugosi () :
+{}
+{
+  main() Func()
+}
+
+/// MAIN -> "void" "main" "{" VARDECL SEQCOMANDOS "}"
+
+void main () :
+{}
+{
+  <VOID> <MAIN> <ACHAVES> VarDecl() SeqComandos() <FCHAVES>
+}
+
+/// VARDECL -> VARDECL "let" TIPO TOKEN_id ";" | vazio
+void VarDecl () :
+{}
+{
+  (<LET> Tipo() <ID> <PONTOEVIRGULA>)*
+}
+
+///TIPO -> "float" | "bool" | "void"
+void Tipo () :
+{}
+{
+  <FLOAT> | <BOOL> | <VOID>
+}
+
+/// SEQCOMANDOS -> SEQCOMANDOS COMANDO | vazio
+void SeqComandos () :
+{}
+{
+  (Comando())*
+}
+
+/// COMANDO -> TOKEN_id ":=" EXP ";"
+// | TOKEN_id "(" LISTAEXP? ")" ";"
+// | "if" EXP "{" SEQCOMANDOS "}" ";"
+// | "while" EXP "do" "{" SEQCOMANDOS "}" ";"
+// | TOKEN_id ":=" "readIO" "(" ")"
+// | "return" EXP ";"
+// | "printIO" EXP ";"
+
+void Comando () :
+{}
+{
+  <ID> ComandoL()
+  | 
+  <IF> Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  | 
+  <WHILE> Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  | 
+  <RETURN> Exp() <PONTOEVIRGULA>
+  | 
+  <PRINTIO> Exp() <PONTOEVIRGULA>
+}
+
+void ComandoL () :
+{}
+{
+  <ATR> ComandoLL()
+  |
+  <APARENTESES> ListaExp() <FPARENTESES> <PONTOEVIRGULA>
+}
+
+void ComandoLL () :
+{}
+{
+  Exp() <PONTOEVIRGULA> 
+  |
+  <READIO> <APARENTESES> <FPARENTESES>
+}
+
+/// EXP -> "(" EXP OP EXP ")" | FATOR
+void Exp () :
+{}
+{
+  (<APARENTESES> Exp() OP() Exp() <FPARENTESES>) | Fator()
+} 
+
+// FATOR -> TOKEN_id | TOKEN_id "(" LISTAEXP? ")"
+// | TOKEN_numliteral | "true" | "false"
+
+void Fator () :
+{}
+{
+  <ID> FatorL()
+  | <NUM> | <TRUE> | <FALSE>
+}
+
+void FatorL () :
+{}
+{
+  (<APARENTESES> ListaExp() <FPARENTESES>)?
+}
+
+/// OP -> "+" | "-" | "*" | "/" | "&&" | "||" | "<" | ">" | "=="
+
+void OP () :
+{}
+{
+  <SOMA> | <SUB> | <MULT> | <DIV> | <AND> | <OR> | <MENOR> | <MAIOR> | <IGUAL>
+}
+
+/// LISTAEXP -> EXP | LISTAEXP "," EXP
+
+void ListaExp () :
+{}
+{
+  Exp() ListaExpL()
+}
+
+void ListaExpL () :
+{}
+{
+  (<VIRGULA> Exp() ListaExpL())?
+}
+
+// FUNC -> FUNC "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
+// | "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
+
+void Func () :
+{}
+{
+  (<DEF> Tipo() <ID> <APARENTESES> ListaArg() <FPARENTESES> <ACHAVES> VarDecl() SeqComandos() <FCHAVES>)*
+}
+
+// LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
+
+void ListaArg () :
+{}
+{
+  Tipo() <ID> (<VIRGULA> Tipo() <ID>)*
+}

@@ -1,0 +1,5 @@
+void main{
+	let float teste;
+	teste := 9.0;
+	printIO teste;
+}

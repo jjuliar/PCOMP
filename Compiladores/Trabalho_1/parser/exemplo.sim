@@ -1,0 +1,8 @@
+main{
+  x:=4;
+  y:=x;
+  print(x);
+  print(y);
+  print(9);
+}
+

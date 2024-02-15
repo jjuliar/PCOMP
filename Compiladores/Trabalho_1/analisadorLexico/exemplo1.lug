@@ -1,0 +1,11 @@
+void main{
+	let float primeiro;
+    let float segundo;
+	primeiro := readIO();
+    segundo := 10.0;
+    while (primeiro < segundo) do {
+        segundo := segundo + segundo;
+        primeiro := primeiro - 1.0;
+    }
+	printIO segundo;
+}

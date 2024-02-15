@@ -1,0 +1,12 @@
+void main{
+	let float primeiro;
+    let float segundo;
+    let float sum;
+	primeiro := 5.0;
+    segundo := 10.0;
+    while (primeiro < segundo) do {
+        sum := (segundo + 1.0);
+        primeiro := (primeiro - 1.0);
+    };
+	printIO sum;
+}

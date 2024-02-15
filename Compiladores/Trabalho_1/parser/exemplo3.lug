@@ -1,0 +1,30 @@
+void main {
+  let float x;
+  let bool flag;
+  x := 5.0;
+  y := 1.0;
+  flag := true;
+
+    while (flag == true) do {
+        printIO x;
+        add(x, y);
+        flag := false;
+    };
+
+
+  if (x > 5.0) {
+    printa(x);
+  };
+
+  
+  return flag;
+}
+
+def float add(float a, float b) {
+  return (a + b);
+}
+
+def void printa(float x){
+    printIO x;
+    return x;
+}

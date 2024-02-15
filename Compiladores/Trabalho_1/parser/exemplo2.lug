@@ -1,0 +1,7 @@
+void main{
+	let teste;
+	teste := true;
+	if (teste == true) {
+        printIO teste;
+    };
+}
