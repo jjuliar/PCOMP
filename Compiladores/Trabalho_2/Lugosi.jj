@@ -99,9 +99,7 @@ void main () :
 }
 
 /// VARDECL -> VARDECL "let" TIPO TOKEN_id ";" | vazio
-//estranho 
 VarDecl VarDecl () :
-///{Exp e=null; Token id=null;Exp result=null;}
 {Token type = null; Token var = null;}
 {
   (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA>)*  {return new VarDecl(type.image,var.image)}
@@ -120,44 +118,6 @@ void SeqComandos () :
 {
   (Comando())*
 }
-
-/// COMANDO -> TOKEN_id ":=" EXP ";"
-// | TOKEN_id "(" LISTAEXP? ")" ";"
-// | "if" EXP "{" SEQCOMANDOS "}" ";"
-// | "while" EXP "do" "{" SEQCOMANDOS "}" ";"
-// | TOKEN_id ":=" "readIO" "(" ")"
-// | "return" EXP ";"
-// | "printIO" EXP ";"
-
-// void Comando () :
-// {int linha=null; Sttring var=null; }
-// {
-//   <ID> ComandoL() 
-//   | 
-//   <IF> Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
-//   | 
-//   <WHILE> Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
-//   | 
-//   <RETURN> Exp() <PONTOEVIRGULA>
-//   | 
-//   <PRINTIO> Exp() <PONTOEVIRGULA>
-// }
-
-// void ComandoL () :
-// {}
-// {
-//   <ATR> ComandoLL()
-//   |
-//   <APARENTESES> ListaExp() <FPARENTESES> <PONTOEVIRGULA>
-// }
-
-// void ComandoLL () :
-// {}
-// {
-//   Exp() <PONTOEVIRGULA> 
-//   |
-//   <READIO> <APARENTESES> <FPARENTESES>
-// }
 
 /// EXP -> "(" EXP OP EXP ")" | FATOR
 // void Exp () :
@@ -264,10 +224,6 @@ Exp Exp () :
 // | TOKEN_id ":=" "readIO" "(" ")"
 // | "return" EXP ";"
 // | "printIO" EXP ";"
-
-
-///rever isso 
-
 Comando Comando () :
 {}
 {
@@ -283,21 +239,22 @@ Comando Comando () :
 }
 
 void ComandoL () :
-{int linha=null; String var=null;}
+{Token id; Exp exp = null; ArrayList<Exp> listaExp = null;}
 {
-  <ATR> ComandoLL() { return new CPrint(getToken(1).beginLine, exp); }
-  |
-  <APARENTESES> ListaExp() <FPARENTESES> <PONTOEVIRGULA>
+  /// existem três casos para ID:
+  /// TOKEN_id ":=" EXP ";"
+  /// TOKEN_id ":=" "readIO" "(" ")"
+  /// TOKEN_id "(" LISTAEXP? ")" ";"
+  id =<ID> <ATR> 
+    (
+        exp = Exp() { return new CAtribuicao(id.beginLine, id.image, exp); }
+        |
+        <READIO> <APARENTESES> <FPARENTESES> { return new CReadInput(id.beginLine, id.image); }
+    ) <PONTOEVIRGULA>
+    |
+    id =<ID> <APARENTESES> [listaExp = ListaExp()] <FPARENTESES> <PONTOEVIRGULA>
+    { return new CChamadaFun(id.beginLine, id.image, listaExp); }
 }
-
-void ComandoLL () :
-{Exp e-null}
-{
-  Exp() <PONTOEVIRGULA>  
-  |
-  <READIO> <APARENTESES> <FPARENTESES> { return new CReadInput(getToken(1).beginLine, ""); }
-}
-
 
 /// isso aqui parece muito esquisito KKKKKKKK 
 
