@@ -219,17 +219,19 @@ Exp Exp () :
 // | "printIO" EXP ";"
 // AJUSTAR SeqComandos() PQ AGORA ELE RECEBE UM ARRAY!!
 Comando Comando () :
-{}
+{Comando resp=mull; Exp exp = null;}
 {
   <ID> ComandoL() 
   | 
-  <IF> Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  <IF> exp = Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>{ resp = new CIf(getToken(1).beginLine, exp); }
   | 
-  <WHILE> Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>
+  <WHILE> exp = Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA> { resp = new CWhile(getToken(1).beginLine, exp); }
   | 
-  <RETURN> Exp() <PONTOEVIRGULA> {return new CReturn(getToken(1).beginLine, exp); }
+  <RETURN> exp = Exp() <PONTOEVIRGULA> { resp = new CReturn(getToken(1).beginLine, exp); }
   | 
-  <PRINTIO> Exp() <PONTOEVIRGULA> { return new CPrint(getToken(1).beginLine, exp); }
+  <PRINTIO> exp = Exp() <PONTOEVIRGULA> { resp = new CPrint(getToken(1).beginLine, exp); }
+
+  {return resp;}
 }
 
 void ComandoL () :
