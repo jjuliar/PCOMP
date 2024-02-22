@@ -79,7 +79,6 @@ TOKEN :
 }
 
 /// LUGOSI -> MAIN FUNC?
-
 Prog Lugosi () :
 {Main main = null; ArrayList<Fun> fun = new ArrayList<>();}
 {
@@ -89,7 +88,6 @@ Prog Lugosi () :
 }
 
 /// MAIN -> "void" "main" "{" VARDECL SEQCOMANDOS "}"
-
 Main main () :
 {ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> coms = new ArrayList<>();}
 {
@@ -99,10 +97,12 @@ Main main () :
 }
 
 /// VARDECL -> VARDECL "let" TIPO TOKEN_id ";" | vazio
-VarDecl VarDecl () :
-{Token type = null; Token var = null;}
+ArrayList <VarDecl> VarDecl () :
+{Token type = null; 
+Token var = null; 
+ArrayList <VarDecl> vars = new ArrayList <VarDecl> ();}
 {
-  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA>)*  {return new VarDecl(type.image,var.image)}
+  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA> {vars.add(var)})*  {return vars}
 }
 
 ///TIPO -> "float" | "bool" | "void"
@@ -122,7 +122,6 @@ ArrayList <Comando> SeqComandos () :
 
 // FATOR -> TOKEN_id | TOKEN_id "(" LISTAEXP? ")"
 // | TOKEN_numliteral | "true" | "false"
-
 Exp Fator () :
 {Token t = null;Comando result=null;}
 {
@@ -241,7 +240,6 @@ void ComandoL () :
   /// TOKEN_id ":=" EXP ";"
   /// TOKEN_id ":=" "readIO" "(" ")"
   /// TOKEN_id "(" LISTAEXP? ")" ";"
-  /// acho que ListaExp() está recebendo o array certinho
   id =<ID> <ATR> 
     (
         exp = Exp() { return new CAtribuicao(id.beginLine, id.image, exp); }
@@ -249,7 +247,7 @@ void ComandoL () :
         <READIO> <APARENTESES> <FPARENTESES> { return new CReadInput(id.beginLine, id.image); }
     ) <PONTOEVIRGULA>
     |
-    id =<ID> <APARENTESES> [listaExp = ListaExp()] <FPARENTESES> <PONTOEVIRGULA>
+    id =<ID> <APARENTESES> listaExp = ListaExp() <FPARENTESES> <PONTOEVIRGULA>
     { return new CChamadaFun(id.beginLine, id.image, listaExp); }
 }
 
