@@ -103,14 +103,14 @@ ArrayList <VarDecl> VarDecl () :
 Token var = null; 
 ArrayList <VarDecl> vars = new ArrayList <VarDecl> ();}
 {
-  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA> {vars.add(var)})*  {return vars}
+  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA> {vars.add(var)})*  {return vars;}
 }
 
 ///TIPO -> "float" | "bool" | "void"
 String Tipo () :
 {Token t = null;}
 {
-  t=<FLOAT> {return t.image}| t=<BOOL> {return t.image}| t=<VOID> {return t.image}
+  t=<FLOAT> {return t.image;}| t=<BOOL> {return t.image;}| t=<VOID> {return t.image;}
 }
 
 /// SEQCOMANDOS -> SEQCOMANDOS COMANDO | vazio
@@ -118,7 +118,7 @@ String Tipo () :
 ArrayList <Comando> SeqComandos () :
 {ArrayList <Comando> comandos = new ArrayList <Comando> (); Comando c;}
 {
-  (c=Comando() {comandos.add(c)})* {return comandos}
+  (c=Comando() {comandos.add(c)})* {return comandos;}
 }
 
 
@@ -138,10 +138,19 @@ Exp Fator () :
 
 
 /// OP -> "+" | "-" | "*" | "/" | "&&" | "||" | "<" | ">" | "=="
-void OP () :
-{}
+String OP () :
+{Token t = null; String result = null;}
 {
-  <SOMA> | <SUB> | <MULT> | <DIV> | <AND> | <OR> | <MENOR> | <MAIOR> | <IGUAL>
+  t=<SOMA> {result = t.image} 
+  | t=<SUB> {result = t.image} 
+  | t=<MULT> {result = t.image}
+  | t=<DIV> {result = t.image}
+  | t=<AND> {result = t.image}
+  | t=<OR> {result = t.image}
+  | t=<MENOR> {result = t.image}
+  | t=<MAIOR> {result = t.image}
+  | t=<IGUAL> {result = t.image}
+  {return result;}
 }
 
 /// LISTAEXP -> EXP | LISTAEXP "," EXP
