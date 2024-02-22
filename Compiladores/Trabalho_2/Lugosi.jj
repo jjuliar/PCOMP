@@ -80,7 +80,7 @@ TOKEN :
 
 /// LUGOSI -> MAIN FUNC?
 
-void Lugosi () :
+Prog Lugosi () :
 {Main main = null; ArrayList<Fun> fun = new ArrayList<>();}
 {
   main = main() (fun = Func())* <EOF> 
@@ -90,7 +90,7 @@ void Lugosi () :
 
 /// MAIN -> "void" "main" "{" VARDECL SEQCOMANDOS "}"
 
-void main () :
+Main main () :
 {ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> coms = new ArrayList<>();}
 {
   <VOID> <MAIN> <ACHAVES> vars=VarDecl() coms=SeqComandos() <FCHAVES>
@@ -106,25 +106,19 @@ VarDecl VarDecl () :
 }
 
 ///TIPO -> "float" | "bool" | "void"
-void Tipo () :
-{}
+String Tipo () :
+{Token t = null;}
 {
-  <FLOAT> | <BOOL> | <VOID>
+  t=<FLOAT> {return t.image}| t=<BOOL> {return t.image}| t=<VOID> {return t.image}
 }
 
 /// SEQCOMANDOS -> SEQCOMANDOS COMANDO | vazio
-void SeqComandos () :
-{}
+/// PRECISA SER ARRAY PRA GUARDAR A SEQUENCIA!!!
+ArrayList <Comando> SeqComandos () :
+{ArrayList <Comando> comandos = new ArrayList <Comando> (); Comando c;}
 {
-  (Comando())*
+  (c=Comando() {comandos.add(c)})* {return comandos}
 }
-
-/// EXP -> "(" EXP OP EXP ")" | FATOR
-// void Exp () :
-// {}
-// {
-//   (<APARENTESES> Exp() OP() Exp() <FPARENTESES>) | Fator()
-// } 
 
 // FATOR -> TOKEN_id | TOKEN_id "(" LISTAEXP? ")"
 // | TOKEN_numliteral | "true" | "false"
@@ -153,11 +147,12 @@ void OP () :
 }
 
 /// LISTAEXP -> EXP | LISTAEXP "," EXP
-
+/// ISSO TEM QUE RETORNAR UM ARRAY!!!!
 void ListaExp () :
 {}
 {
-  Exp() ListaExpL()
+  Exp() 
+  | ListaExpL() <VIRGULA> Exp()
 }
 
 void ListaExpL () :
@@ -224,6 +219,7 @@ Exp Exp () :
 // | TOKEN_id ":=" "readIO" "(" ")"
 // | "return" EXP ";"
 // | "printIO" EXP ";"
+// AJUSTAR SeqComandos() PQ AGORA ELE RECEBE UM ARRAY!!
 Comando Comando () :
 {}
 {
@@ -245,6 +241,7 @@ void ComandoL () :
   /// TOKEN_id ":=" EXP ";"
   /// TOKEN_id ":=" "readIO" "(" ")"
   /// TOKEN_id "(" LISTAEXP? ")" ";"
+  /// acho que ListaExp() está recebendo o array certinho
   id =<ID> <ATR> 
     (
         exp = Exp() { return new CAtribuicao(id.beginLine, id.image, exp); }
