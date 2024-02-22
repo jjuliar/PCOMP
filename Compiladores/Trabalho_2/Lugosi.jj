@@ -155,18 +155,14 @@ String OP () :
 
 /// LISTAEXP -> EXP | LISTAEXP "," EXP
 /// ISSO TEM QUE RETORNAR UM ARRAY!!!!
-void ListaExp () :
-{}
+ArrayList <Exp> ListaExp () :
+{Exp exp; ArrayList <Exp> listaExp = new ArrayList <Exp> ();}
 {
-  Exp() 
-  | ListaExpL() <VIRGULA> Exp()
+  exp=Exp() {listaExp.add(exp);} (<VIRGULA> exp=Exp() {listaExp.add(exp);})*
+  {return listaExp;}
 }
 
-void ListaExpL () :
-{}
-{
-  (<VIRGULA> Exp() ListaExpL())?
-}
+
 
 ParamFormalFun ParamFormalFun () :
 {Token type = null; Token var = null;}
