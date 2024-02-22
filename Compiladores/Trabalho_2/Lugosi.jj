@@ -97,6 +97,7 @@ Main main () :
 }
 
 /// VARDECL -> VARDECL "let" TIPO TOKEN_id ";" | vazio
+/// TBM É UM ARRAY
 ArrayList <VarDecl> VarDecl () :
 {Token type = null; 
 Token var = null; 
@@ -120,25 +121,23 @@ ArrayList <Comando> SeqComandos () :
   (c=Comando() {comandos.add(c)})* {return comandos}
 }
 
+
 // FATOR -> TOKEN_id | TOKEN_id "(" LISTAEXP? ")"
 // | TOKEN_numliteral | "true" | "false"
 Exp Fator () :
-{Token t = null;Comando result=null;}
+{Token t = null;Exp result=null; ArrayList <Exp> listaExp = new ArrayList <Exp> ();}
 {
-  t=<ID> FatorL() {result = new EVar(t.image);}
-  | t=<NUM> {result = new EFloat(t.image)} | {result = new ETrue()} | {result = new EFalse()}
+  t=<ID> (
+        <APARENTESES> listaExp=ListaExp() <FPARENTESES> {result= EChamadaFun(t.image, listaExp)}
+        |
+        {result= EVar(t.image)}
+        )
+  | t=<NUM> {result = EFloat(t.image)} | t=<TRUE> {result = ETrue(t.image)} | t=<FALSE> {result = EFalse(t.image)}
   {return result;} 
 }
 
-Exp FatorL () :
-{Exp e=null;Comando result=null;}
-{
-  (<APARENTESES> e=ListaExp() <FPARENTESES> {result = new Exp(e);})?
-  {return result;} 
-}
 
 /// OP -> "+" | "-" | "*" | "/" | "&&" | "||" | "<" | ">" | "=="
-
 void OP () :
 {}
 {
