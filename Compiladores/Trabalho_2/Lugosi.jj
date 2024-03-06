@@ -23,9 +23,9 @@ public class Lugosi {
   // alvo na linguagem escolhida:
   geraCodigo(arvore, args[0])
   }
-  public static void geraCodigo(ArvoreLugosi prog, String arquivo){
-    //a
-  }
+  // public static void geraCodigo(ArvoreLugosi prog, String arquivo){
+  //   //a
+  // }
 }
 
 PARSER_END(Lugosi)
@@ -80,19 +80,20 @@ TOKEN :
 
 /// LUGOSI -> MAIN FUNC?
 Prog Lugosi () :
-{Main main = null; ArrayList<Fun> fun = new ArrayList<>();}
+{Main main = null; ArrayList<Fun> ListaFun = new ArrayList <Fun> (); Token fun = NULL}
 {
-  main = main() (fun = Func())* <EOF> 
-  {return new Prog(main, fun);}
+  main = main() (fun = Func())* <EOF> {ListaFun.add(fun);}
+  {return new Prog(main, ListaFun);}
   
 }
 
 /// MAIN -> "void" "main" "{" VARDECL SEQCOMANDOS "}"
 Main main () :
-{ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> coms = new ArrayList<>();}
+{ArrayList<VarDecl> ListaVars = new ArrayList <VarDecl> (); ArrayList<Comando> ListaComs = new ArrayList <Comando> ();
+Token var = NULL; Token com = NULL;}
 {
-  <VOID> <MAIN> <ACHAVES> vars=VarDecl() coms=SeqComandos() <FCHAVES>
-  { return new Main(vars, coms); }
+  <VOID> <MAIN> <ACHAVES> var=VarDecl() com=SeqComandos() <FCHAVES>{} {ListaVars.add(var); ListaComs.add(com);}
+  { return new Main(ListaVars, ListaComs); }
 
 }
 
@@ -176,12 +177,18 @@ ParamFormalFun ParamFormalFun () :
 // FUNC -> FUNC "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
 // | "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
 
-void Func () :
-{String nome; String retorno; ArrayList<ParamFormalFun> params = new ArrayList<>(); ArrayList<VarDecl> vars = new ArrayList<>(); ArrayList<Comando> body = new ArrayList<>(); }
+Fun Func () :
+{ArrayList<VarDecl> ListaVar = new ArrayList <VarDecl> (); 
+ArrayList<Comando> ListaComandos = new ArrayList <Comando> ();
+ArrayList<ParamFormalFun> ListaParams = new ArrayList <ParamFormalFun> ();
+Token var = null;
+Token com = null;
+Token param = null;
+Token nome = null;
+Token retorno = null; }
 {
-  (<DEF> Tipo() <ID> <APARENTESES> ListaArg() <FPARENTESES> <ACHAVES> VarDecl() SeqComandos() <FCHAVES> 
-   {return new Fun(nome, params, retorno, vars, body);}
-  )*
+  (<DEF> retorno=Tipo() nome=<ID> <APARENTESES> param=ListaArg() <FPARENTESES> <ACHAVES> var=VarDecl() com=SeqComandos() <FCHAVES> {ListaVar.add(var); ListaComandos.add(com); ListaParams.add(param);})*
+  {return new Fun(nome.image, ListaParams, retorno.image, ListaVar, ListaComandos);}
 }
 
 // LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
