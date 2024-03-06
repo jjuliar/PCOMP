@@ -17,7 +17,7 @@ public class Lugosi {
   // Chamar a primeira regra do parser que irá
   // analisar o código e devolver a árvore sintática
 
-  Prog arvore =parser.Lugosi();
+  Prog arvore = parser.Lugosi();
   // passar a árvore para o gerador de código
   // que deve gerar um arquivo com com o código
   // alvo na linguagem escolhida:
@@ -228,7 +228,7 @@ Exp Exp () :
 // | "printIO" EXP ";"
 // AJUSTAR SeqComandos() PQ AGORA ELE RECEBE UM ARRAY!!
 Comando Comando () :
-{Comando resp=mull; Exp exp = null;}
+{Comando resp=null; Exp exp = null;}
 {
   <ID> ComandoL() 
   | 
