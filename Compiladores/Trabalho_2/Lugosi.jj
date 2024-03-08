@@ -164,16 +164,6 @@ ArrayList <Exp> ListaExp () :
 }
 
 
-
-// ParamFormalFun ParamFormalFun () :
-// {Token type = null; Token var = null;}
-// {
-//   type = Tipo() 
-//   var = <ID> 
-//   {return new ParamFormalFun(type.image, var.image);}
-// }
-
-
 // FUNC -> FUNC "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
 // | "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
 
@@ -214,16 +204,16 @@ Exp Exp () :
 
 /// Não sei se isso tá certo!!!! 
 
-Exp Exp () :
-{ Exp result = null;}
-{
-  result = Fator()
-  (
-    | <APARENTESES> args = ListaExp() <FPARENTESES> { result = new EChamadaFun(result.getName(), args); }
-  )
+// Exp Exp () :
+// { Exp result = null;}
+// {
+//   result = Fator()
+//   (
+//     | <APARENTESES> args = ListaExp() <FPARENTESES> { result = new EChamadaFun(result.getName(), args); }
+//   )
   
-  {return result;}
-} 
+//   {return result;}
+// } 
 
 /// COMANDO -> TOKEN_id ":=" EXP ";"
 // | TOKEN_id "(" LISTAEXP? ")" ";"
