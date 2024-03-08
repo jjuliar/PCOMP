@@ -104,7 +104,7 @@ ArrayList <VarDecl> VarDecl () :
 Token var = null; 
 ArrayList <VarDecl> vars = new ArrayList <VarDecl> ();}
 {
-  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA> {vars.add(var)})*  {return vars;}
+  (<LET> type=Tipo() var=<ID> <PONTOEVIRGULA> {vars.add(new VarDecl(type.image, var.image));)*  {return vars;}
 }
 
 ///TIPO -> "float" | "bool" | "void"
@@ -171,14 +171,11 @@ Fun Func () :
 {ArrayList<VarDecl> ListaVar = new ArrayList <VarDecl> (); 
 ArrayList<Comando> ListaComandos = new ArrayList <Comando> ();
 ArrayList<ParamFormalFun> ListaParams = new ArrayList <ParamFormalFun> ();
-Token var = null;
-Token com = null;
-Token param = null;
 Token nome = null;
-Token retorno = null; }
+String retorno = null; }
 {
-  (<DEF> retorno=Tipo() nome=<ID> <APARENTESES> param=ListaArg() <FPARENTESES> <ACHAVES> var=VarDecl() com=SeqComandos() <FCHAVES> {ListaVar.add(var); ListaComandos.add(com); ListaParams.add(param);})*
-  {return new Fun(nome.image, ListaParams, retorno.image, ListaVar, ListaComandos);}
+  (<DEF> retorno=Tipo() nome=<ID> <APARENTESES> ListaParams=ListaArg() <FPARENTESES> <ACHAVES> ListaVar=VarDecl() ListaComandos=SeqComandos() <FCHAVES>)*
+  {return new Fun(nome.image, ListaParams, retorno, ListaVar, ListaComandos);}
 }
 
 // LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
@@ -224,13 +221,14 @@ Exp Exp () :
 // | "printIO" EXP ";"
 // AJUSTAR SeqComandos() PQ AGORA ELE RECEBE UM ARRAY!!
 Comando Comando () :
-{Comando resp=null; Exp exp = null;}
+{Comando resp=null; Exp exp = null;
+ArrayList<Comando> ListaComandos = new ArrayList <Comando> ();}
 {
   <ID> ComandoL() 
   | 
-  <IF> exp = Exp() <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA>{ resp = new CIf(getToken(1).beginLine, exp); }
+  <IF> exp = Exp() <ACHAVES> ListaComandos=SeqComandos() <FCHAVES> <PONTOEVIRGULA>{ resp = new CIf(getToken(1).beginLine, exp, ListaComandos); }
   | 
-  <WHILE> exp = Exp() <DO> <ACHAVES> SeqComandos() <FCHAVES> <PONTOEVIRGULA> { resp = new CWhile(getToken(1).beginLine, exp); }
+  <WHILE> exp = Exp() <DO> <ACHAVES> ListaComandos=SeqComandos() <FCHAVES> <PONTOEVIRGULA> { resp = new CWhile(getToken(1).beginLine, exp, ListaComandos); }
   | 
   <RETURN> exp = Exp() <PONTOEVIRGULA> { resp = new CReturn(getToken(1).beginLine, exp); }
   | 
@@ -240,7 +238,8 @@ Comando Comando () :
 }
 
 void ComandoL () :
-{Token id; Exp exp = null; ArrayList<Exp> listaExp = null;}
+{Token id; Exp exp = null; 
+ArrayList <Exp> listaExp = new ArrayList <Exp> ();}
 {
   /// existem três casos para ID:
   /// TOKEN_id ":=" EXP ";"
