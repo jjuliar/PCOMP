@@ -82,7 +82,7 @@ TOKEN :
 Prog Lugosi () :
 {Main main = null; ArrayList<Fun> ListaFun = new ArrayList <Fun> (); Token fun = NULL}
 {
-  main = main() (fun = Func())* <EOF> {ListaFun.add(fun);}
+  (main = main() (fun = Func())* <EOF> {ListaFun.add(fun);})
   {return new Prog(main, ListaFun);}
   
 }
@@ -92,7 +92,7 @@ Main main () :
 {ArrayList<VarDecl> ListaVars = new ArrayList <VarDecl> (); ArrayList<Comando> ListaComs = new ArrayList <Comando> ();
 Token var = NULL; Token com = NULL;}
 {
-  <VOID> <MAIN> <ACHAVES> var=VarDecl() com=SeqComandos() <FCHAVES>{} {ListaVars.add(var); ListaComs.add(com);}
+  (<VOID> <MAIN> <ACHAVES> var=VarDecl() com=SeqComandos() <FCHAVES>{} {ListaVars.add(var); ListaComs.add(com);})
   { return new Main(ListaVars, ListaComs); }
 
 }
@@ -165,13 +165,13 @@ ArrayList <Exp> ListaExp () :
 
 
 
-ParamFormalFun ParamFormalFun () :
-{Token type = null; Token var = null;}
-{
-  type = Tipo() 
-  var = <ID> 
-  {return new ParamFormalFun(type.image, var.image);}
-}
+// ParamFormalFun ParamFormalFun () :
+// {Token type = null; Token var = null;}
+// {
+//   type = Tipo() 
+//   var = <ID> 
+//   {return new ParamFormalFun(type.image, var.image);}
+// }
 
 
 // FUNC -> FUNC "def" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"
@@ -192,11 +192,14 @@ Token retorno = null; }
 }
 
 // LISTAARG -> TIPO TOKEN_id | LISTAARG "," TIPO TOKEN_id
-
-void ListaArg () :
-{}
+// dúvida no tipo mas acho que é isso
+ArrayList<ParamFormalFun> ListaArg () :
+{Token tipo = NULL; Token var = NULL;
+ArrayList<String> listaTipos = new ArrayList <String> ();
+ArrayList<String> listaVars = new ArrayList <String> ();}
 {
-  Tipo() <ID> (<VIRGULA> Tipo() <ID>)*
+  (tipo=Tipo() var=<ID> {listaTipos.add(tipo.image);listaVars.add(var.image);} (<VIRGULA> tipo=Tipo() var=<ID> {listaTipos.add(tipo.image);listaVars.add(var.image);})*)
+  {return new ParamFormalFun(listaTipos, listaVars)}
 }
 
 
