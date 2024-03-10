@@ -3,35 +3,46 @@ import java.util.*;
 
 import ast.*;
 
-public class geraCodigo {
-    public geraCodigo(Prog prog) {
-        for(Fun f : prog.fun){ 
-            geraFun(f);
-        }
+public class GeraCodigo {
+    private static PrintWriter writer;
 
-        geraMain(prog.main);
+    public static void gerar(Prog prog) {
+        try {
+            writer = new PrintWriter("output.java", "UTF-8");
+
+            for(Fun f : prog.fun){ 
+                geraFun(f);
+            }
+
+            geraMain(prog.main);
+
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file.");
+            e.printStackTrace();
+        }
     }
 
     // Gera o código da classe Main
     public static void geraMain(Main main){
-        System.out.println("public static void main(String[] args) {");
+        writer.println("public static void main(String[] args) {");
 
         for(VarDecl vardecl: main.vars){
             geraVarDecl(vardecl);
         }
 
-        geraComandos(main.comandos);
+        geraComandos(main.coms);
         
-        System.out.println("}");
+        writer.println("}");
     }
 
     // Gera o código da classe Fun
     public static void geraFun(Fun fun){
-        System.out.println("public static " + fun.retorno + " " + fun.nome + "(");
+        writer.println("public static " + fun.retorno + " " + fun.nome + "(");
         for(ParamFormalFun param: fun.params){
-            System.out.println(param.tipo + " " + param.nome + ",");
+            writer.println(param.type + " " + param.var + ",");
         }
-        System.out.println(") {");
+        writer.println(") {");
 
         for(VarDecl vardecl: fun.vars){
             geraVarDecl(vardecl);
@@ -39,7 +50,7 @@ public class geraCodigo {
 
         geraComandos(fun.body);
         
-        System.out.println("}");
+        writer.println("}");
     }
 
     /**
@@ -72,41 +83,41 @@ public class geraCodigo {
 
     // Gera o código da classe CAtribuicao
     public static void geraAtribuicao(CAtribuicao atribuicao){
-        System.out.println(atribuicao.var + " = " + geraExp(atribuicao.exp) + ";");
+        writer.println(atribuicao.var + " = " + geraExp(atribuicao.exp) + ";");
     }
 
     // Gera o código da classe CIf
-    public static void geraIf(If ifcmd){
-        System.out.println("if(" + geraExp(ifcmd.exp) + "){");
+    public static void geraIf(CIf ifcmd){
+        writer.println("if(" + geraExp(ifcmd.exp) + "){");
         geraComandos(ifcmd.bloco);
-        System.out.println("}");
+        writer.println("}");
     }
 
     // Gera o código da classe CWhile
-    public static void geraWhile(While whilecmd){
-        System.out.println("while(" + geraExp(whilecmd.exp) + "){");
+    public static void geraWhile(CWhile whilecmd){
+        writer.println("while(" + geraExp(whilecmd.exp) + "){");
         geraComandos(whilecmd.bloco);
-        System.out.println("}");
+        writer.println("}");
     }
 
     // Gera o código da classe CPrint
     public static void geraPrint(CPrint print){
-        System.out.println("System.out.println(" + geraExp(print.exp) + ");");
+        writer.println("System.out.println(" + geraExp(print.exp) + ");");
     }
 
     // Gera o código da classe CReturn
     public static void geraReturn(CReturn ret){
-        System.out.println("return " + geraExp(ret.exp) + ";");
+        writer.println("return " + geraExp(ret.exp) + ";");
     }
 
     // Gera o código da classe CReadInput
     public static void geraReadInput(CReadInput read){
-        System.out.println(read.var + " = " + "new Scanner(System.in).nextInt();");
+        writer.println(read.var + " = " + "new Scanner(System.in).nextInt();");
     }
 
     // Gera o código da classe CChamadaFun
     public static void geraChamadaFun(CChamadaFun chamada){
-        System.out.println(chamada.fun + "(" + geraArgs(chamada.args) + ");");
+        writer.println(chamada.fun + "(" + geraArgs(chamada.args) + ");");
     }
 
     public static String geraArgs(ArrayList<Exp> args){
@@ -121,7 +132,7 @@ public class geraCodigo {
         if(exp instanceof ETrue){
             return "True";
         }else if(exp instanceof EFloat){
-            return ((EFloat)exp).value;
+            return String.valueOf(((EFloat)exp).value);
         }else if(exp instanceof EVar){
             return ((EVar)exp).var;
         }else if(exp instanceof EChamadaFun){
@@ -150,6 +161,6 @@ public class geraCodigo {
 
     // Gera o código da classe VarDecl
     public static void geraVarDecl(VarDecl vardecl){
-        System.out.println(vardecl.type + " " + vardecl.var + ";");
+        writer.println(vardecl.type + " " + vardecl.var + ";");
     }
 }
