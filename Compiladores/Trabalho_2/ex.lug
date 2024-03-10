@@ -1,0 +1,6 @@
+void main {
+    let float myVar;
+    myVar := 3.14;
+    myVar := (myVar + 1);
+    printIO myVar;
+}
