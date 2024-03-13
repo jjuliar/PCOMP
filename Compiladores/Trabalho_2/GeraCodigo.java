@@ -45,12 +45,11 @@ public class GeraCodigo {
         ParamFormalFun param = fun.params.get(i);
         String paramType = param.type.equals("bool") ? "boolean" : param.type; // Translate "bool" to "boolean"
         paramsBuilder.append(paramType).append(" ").append(param.var);
-        // Add a comma only if this is not the last parameter
+        // pra não ficar uma virgula a mais
         if (i < fun.params.size() - 1) {
             paramsBuilder.append(", ");
         }
     }
-    // Now append the parameters as part of the function definition
     writer.println("public static " + fun.retorno + " " + fun.nome + "(" + paramsBuilder.toString() + ") {");
 
         for(VarDecl vardecl: fun.vars){

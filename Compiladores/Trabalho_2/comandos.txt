@@ -1,0 +1,4 @@
+javacc Lugosi.jj
+javac *.java
+java Lugosi ex.lug
+java Lugosi ex2.lug
