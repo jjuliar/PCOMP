@@ -25,6 +25,7 @@ public class GeraCodigo {
 
     // Gera o código da classe Main
     public static void geraMain(Main main){
+        writer.println("public class output {");
         writer.println("public static void main(String[] args) {");
 
         for(VarDecl vardecl: main.vars){
@@ -33,6 +34,7 @@ public class GeraCodigo {
 
         geraComandos(main.coms);
         
+        writer.println("}");
         writer.println("}");
     }
 
@@ -132,7 +134,7 @@ public class GeraCodigo {
         if(exp instanceof ETrue){
             return "True";
         }else if(exp instanceof EFloat){
-            return String.valueOf(((EFloat)exp).value);
+            return (String.valueOf(((EFloat)exp).value)+"f");
         }else if(exp instanceof EVar){
             return ((EVar)exp).var;
         }else if(exp instanceof EChamadaFun){
