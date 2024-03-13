@@ -9,6 +9,7 @@ public class GeraCodigo {
     public static void gerar(Prog prog) {
         try {
             writer = new PrintWriter("output.java", "UTF-8");
+            writer.println("public class output {");
 
             for(Fun f : prog.fun){ 
                 geraFun(f);
@@ -25,7 +26,6 @@ public class GeraCodigo {
 
     // Gera o código da classe Main
     public static void geraMain(Main main){
-        writer.println("public class output {");
         writer.println("public static void main(String[] args) {");
 
         for(VarDecl vardecl: main.vars){
@@ -40,11 +40,18 @@ public class GeraCodigo {
 
     // Gera o código da classe Fun
     public static void geraFun(Fun fun){
-        writer.println("public static " + fun.retorno + " " + fun.nome + "(");
-        for(ParamFormalFun param: fun.params){
-            writer.println(param.type + " " + param.var + ",");
+        StringBuilder paramsBuilder = new StringBuilder();
+    for (int i = 0; i < fun.params.size(); i++) {
+        ParamFormalFun param = fun.params.get(i);
+        String paramType = param.type.equals("bool") ? "boolean" : param.type; // Translate "bool" to "boolean"
+        paramsBuilder.append(paramType).append(" ").append(param.var);
+        // Add a comma only if this is not the last parameter
+        if (i < fun.params.size() - 1) {
+            paramsBuilder.append(", ");
         }
-        writer.println(") {");
+    }
+    // Now append the parameters as part of the function definition
+    writer.println("public static " + fun.retorno + " " + fun.nome + "(" + paramsBuilder.toString() + ") {");
 
         for(VarDecl vardecl: fun.vars){
             geraVarDecl(vardecl);
@@ -122,17 +129,23 @@ public class GeraCodigo {
         writer.println(chamada.fun + "(" + geraArgs(chamada.args) + ");");
     }
 
-    public static String geraArgs(ArrayList<Exp> args){
-        String ret = "";
-        for(Exp exp: args){
-            ret += geraExp(exp) + ",";
+    public static String geraArgs(ArrayList<Exp> args) {
+    StringBuilder ret = new StringBuilder();
+    for (int i = 0; i < args.size(); i++) {
+        Exp exp = args.get(i);
+        ret.append(geraExp(exp));
+        // pra não ficar uma virgula a mais
+        if (i < args.size() - 1) {
+            ret.append(",");
         }
-        return ret;
     }
+    return ret.toString();
+}
+
 
     public static String geraExp(Exp exp){
         if(exp instanceof ETrue){
-            return "True";
+            return "true";
         }else if(exp instanceof EFloat){
             return (String.valueOf(((EFloat)exp).value)+"f");
         }else if(exp instanceof EVar){
@@ -142,19 +155,25 @@ public class GeraCodigo {
         }else if(exp instanceof EOpExp){
             return geraOper((EOpExp)exp);
         } else if (exp instanceof EFalse){
-            return "False";
+            return "false";
         }
         return "";
     }
 
     // Gera o código da classe EChamadaFun
-    public static String geraChamadaFun(EChamadaFun chamada){
-        String ret = chamada.fun + "(";
-        for(Exp exp: chamada.args){
-            ret += geraExp(exp) + ",";
+    public static String geraChamadaFun(EChamadaFun chamada) {
+    StringBuilder ret = new StringBuilder(chamada.fun + "(");
+    for (int i = 0; i < chamada.args.size(); i++) {
+        Exp exp = chamada.args.get(i);
+        ret.append(geraExp(exp));
+        // pra não ficar uma virgula a mais
+        if (i < chamada.args.size() - 1) {
+            ret.append(",");
         }
-        return ret + ")";
     }
+    ret.append(")");
+    return ret.toString();
+}
 
     // Gera o código da classe EOpExp
     public static String geraOper(EOpExp op){
@@ -163,6 +182,7 @@ public class GeraCodigo {
 
     // Gera o código da classe VarDecl
     public static void geraVarDecl(VarDecl vardecl){
-        writer.println(vardecl.type + " " + vardecl.var + ";");
+        String varType = vardecl.type.equals("bool") ? "boolean" : vardecl.type; // Translate "bool" to "boolean"
+        writer.println(varType + " " + vardecl.var + ";");
     }
 }
