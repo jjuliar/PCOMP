@@ -11,7 +11,7 @@ y = 1.0f;
 flag = true;
 while(flag == true){
 System.out.println(x);
-add(x,y);
+x = add(x,y);
 flag = false;
 }
 if(x > 5.0f){

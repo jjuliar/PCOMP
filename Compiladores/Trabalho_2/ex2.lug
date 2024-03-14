@@ -8,7 +8,7 @@ void main {
 
     while (flag == true) do {
         printIO x;
-        add(x, y);
+        x := add(x, y);
         flag := false;
     };
 
